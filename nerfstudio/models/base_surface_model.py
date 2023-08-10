@@ -25,7 +25,7 @@ from typing import Dict, List, Tuple, Type
 import torch
 import torch.nn.functional as F
 from torch.nn import Parameter
-from torchmetrics import PeakSignalNoiseRatio
+from torchmetrics.image import PeakSignalNoiseRatio
 from torchmetrics.functional import structural_similarity_index_measure
 from torchmetrics.image.lpip import LearnedPerceptualImagePatchSimilarity
 from torchtyping import TensorType
@@ -296,6 +296,25 @@ class SurfaceModel(Model):
 
         normal = self.renderer_normal(semantics=field_outputs[FieldHeadNames.NORMAL], weights=weights)
         accumulation = self.renderer_accumulation(weights=weights)
+
+        # TODO add a flat to control how the background model are combined with foreground sdf field
+        # background model
+        if self.config.background_model != "none" and "bg_transmittance" in samples_and_field_outputs:
+            bg_transmittance = samples_and_field_outputs["bg_transmittance"]
+
+            # sample inversely from far to 1000 and points and forward the bg model
+            ray_bundle.nears = ray_bundle.fars
+            ray_bundle.fars = torch.ones_like(ray_bundle.fars) * self.config.far_plane_bg
+
+            ray_samples_bg = self.sampler_bg(ray_bundle)
+            # use the same background model for both density field and occupancy field
+            field_outputs_bg = self.field_background(ray_samples_bg)
+            weights_bg = ray_samples_bg.get_weights(field_outputs_bg[FieldHeadNames.DENSITY])
+
+            rgb_bg = self.renderer_rgb(rgb=field_outputs_bg[FieldHeadNames.RGB], weights=weights_bg)
+
+            # merge background color to forgound color
+            rgb = rgb + bg_transmittance * rgb_bg
 
         outputs = {
             "rgb": rgb,
