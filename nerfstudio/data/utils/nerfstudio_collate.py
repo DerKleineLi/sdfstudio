@@ -28,6 +28,9 @@ from torch._six import string_classes
 from nerfstudio.cameras.cameras import Cameras
 from nerfstudio.utils.images import BasicImages
 
+# string_classes = str # if it doesn't work
+
+
 # pylint: disable=implicit-str-concat
 NERFSTUDIO_COLLATE_ERR_MSG_FORMAT = (
     "default_collate: batch must contain tensors, numpy arrays, numbers, " "dicts, lists or anything in {}; found {}"
