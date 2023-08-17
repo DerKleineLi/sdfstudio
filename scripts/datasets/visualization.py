@@ -110,7 +110,7 @@ class VisOpen3D:
         # plt.imshow(depth)
         # plt.show()
 
-    def draw_camera(self, intrinsic, extrinsic, scale=1, color=None):
+    def draw_camera(self, intrinsic, extrinsic, scale=1, plane_scale = 1 ,color=None):
         # intrinsics
         K = intrinsic
 
@@ -122,7 +122,7 @@ class VisOpen3D:
         width = self.__width
         height = self.__height
 
-        geometries = draw_camera(K, R, t, width, height, scale, color)
+        geometries = draw_camera(K, R, t, width, height, scale, plane_scale, color)
         for g in geometries:
             self.add_geometry(g)
 
@@ -130,12 +130,15 @@ class VisOpen3D:
         geometries = draw_points3D(points3D, color)
         for g in geometries:
             self.add_geometry(g)
+            
+    def reset_view_point(self):
+        self.__vis.reset_view_point(True)
 
 
 #
 # Auxiliary funcions
 #
-def draw_camera(K, R, t, width, height, scale=1, color=None):
+def draw_camera(K, R, t, width, height, scale=1, plane_scale=1, color=None):
     """Create axis, plane and pyramid geometries in Open3D format
     :   param K     : calibration matrix (camera intrinsics)
     :   param R     : rotation matrix
@@ -152,10 +155,10 @@ def draw_camera(K, R, t, width, height, scale=1, color=None):
         color = [0.8, 0.2, 0.8]
 
     # camera model scale
-    s = 1 / scale
+    s = 1 / plane_scale
 
     # intrinsics
-    Ks = np.array([[K[0, 0] * s, 0, K[0, 2]], [0, K[1, 1] * s, K[1, 2]], [0, 0, K[2, 2]]])
+    Ks = np.array([[K[0, 0]*s, 0, K[0, 2]], [0, K[1, 1]*s, K[1, 2]], [0, 0, K[2, 2]]])
     Kinv = np.linalg.inv(Ks)
 
     # 4x4 transformation
@@ -200,7 +203,7 @@ def draw_camera(K, R, t, width, height, scale=1, color=None):
     line_set.colors = open3d.utility.Vector3dVector(colors)
 
     # return as list in Open3D format
-    return [axis, line_set]
+    return [axis, line_set, plane]
 
 
 def create_coordinate_frame(T, scale=0.25):
