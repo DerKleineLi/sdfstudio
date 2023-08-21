@@ -2,6 +2,7 @@ import argparse
 import json
 import os
 from pathlib import Path
+
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
@@ -218,27 +219,27 @@ def main(args):
     with open(output_dir / "meta_data.json", "w", encoding="utf-8") as f:
         json.dump(meta_data, f, indent=4)
 
-    # === Generate mono priors using omnidata ===
-    if args.mono_prior:
-        assert os.path.exists(args.pretrained_models), "Pretrained model path not found"
-        assert os.path.exists(args.omnidata_path), "omnidata l path not found"
-        # generate mono depth and normal
-        print("Generating mono depth...")
-        os.system(
-            f"python scripts/datasets/extract_monocular_cues.py \
-            --omnidata_path {args.omnidata_path} \
-            --pretrained_model {args.pretrained_models} \
-            --img_path {output_dir} --output_path {output_dir} \
-            --task depth"
-        )
-        print("Generating mono normal...")
-        os.system(
-            f"python scripts/datasets/extract_monocular_cues.py \
-            --omnidata_path {args.omnidata_path} \
-            --pretrained_model {args.pretrained_models} \
-            --img_path {output_dir} --output_path {output_dir} \
-            --task normal"
-        )
+    # # === Generate mono priors using omnidata ===
+    # if args.mono_prior:
+    #     assert os.path.exists(args.pretrained_models), "Pretrained model path not found"
+    #     assert os.path.exists(args.omnidata_path), "omnidata l path not found"
+    #     # generate mono depth and normal
+    #     print("Generating mono depth...")
+    #     os.system(
+    #         f"python scripts/datasets/extract_monocular_cues.py \
+    #         --omnidata_path {args.omnidata_path} \
+    #         --pretrained_model {args.pretrained_models} \
+    #         --img_path {output_dir} --output_path {output_dir} \
+    #         --task depth"
+    #     )
+    #     print("Generating mono normal...")
+    #     os.system(
+    #         f"python scripts/datasets/extract_monocular_cues.py \
+    #         --omnidata_path {args.omnidata_path} \
+    #         --pretrained_model {args.pretrained_models} \
+    #         --img_path {output_dir} --output_path {output_dir} \
+    #         --task normal"
+    #     )
 
     print(f"Done! The processed data has been saved in {output_dir}")
 
